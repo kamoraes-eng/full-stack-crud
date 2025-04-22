@@ -3,12 +3,14 @@ services:
     build: ./docker/postgres
     image: postgres:15-alpine
     environment:
+      POSTGRES_USER: postgres 
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: user_crud
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
