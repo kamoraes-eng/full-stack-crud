@@ -1,50 +1,47 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
-import jwt_decode from 'jwt-decode'
+'use client';
+import { createContext, useState, useEffect, useContext, ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
+import { login as loginService } from '../services/authService';
 
-interface AuthContextType {
-  user: { id: string; email: string } | null
-  login: (email: string, password: string) => Promise<void>
-  logout: () => void
-}
+type User = { id: string; name: string; email: string };
+export type AuthContextType = {
+  user: User | null;
+  login: (email: string, password: string) => Promise<void>;
+  signOut: () => void;
+};
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined)
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<{ id: string; email: string } | null>(null)
-
-  const loginFn = async (email: string, password: string) => {
-    const { login } = await import('../services/authService')
-    const token = await login(email, password)
-    const payload = jwt_decode<{ sub: string; email: string }>(token)
-    setUser({ id: payload.sub, email: payload.email })
-  }
-
-  const logoutFn = () => {
-    localStorage.removeItem('token')
-    setUser(null)
-  }
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
-    if (token) {
-      try {
-        const payload = jwt_decode<{ sub: string; email: string }>(token)
-        setUser({ id: payload.sub, email: payload.email })
-      } catch {
-        logoutFn()
-      }
-    }
-  }, [])
+    const stored = localStorage.getItem('user');
+    if (stored) setUser(JSON.parse(stored));
+  }, []);
+
+  const login = async (email: string, password: string) => {
+    const u = await loginService(email, password);
+    setUser(u);
+    localStorage.setItem('user', JSON.stringify(u));
+  };
+
+  const signOut = () => {
+    localStorage.removeItem('user');
+    setUser(null);
+    router.push('/login');
+  };
 
   return (
-    <AuthContext.Provider value={{ user, login: loginFn, logout: logoutFn }}>
+    <AuthContext.Provider value={{ user, login, signOut }}>
       {children}
     </AuthContext.Provider>
-  )
+  );
 }
 
-export const useAuth = () => {
-  const ctx = useContext(AuthContext)
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider')
-  return ctx
+export function useAuth() {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
+  return ctx;
 }
