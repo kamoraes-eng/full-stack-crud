@@ -25,8 +25,21 @@ export class TypeOrmUserRepository implements UserRepository {
   }
 
   async findById(id: string): Promise<User | null> {
-    const ormEntity = await this.ormRepository.findOneBy({ id })
-    return ormEntity ? this.toDomainEntity(ormEntity) : null
+    const ormEntity = await this.ormRepository.findOne({ 
+      where: { id } 
+    });
+    
+    if (!ormEntity) return null;
+    
+    return new User(
+      ormEntity.id,
+      ormEntity.name,
+      EmailVO.create(ormEntity.email),
+      ormEntity.password,
+      false,
+      ormEntity.createdAt,
+      ormEntity.updatedAt
+    );
   }
 
   async findByEmail(email: EmailVO): Promise<User | null> {
@@ -55,6 +68,7 @@ export class TypeOrmUserRepository implements UserRepository {
       orm.name,
       emailVO ?? EmailVO.create(orm.email),
       orm.password,
+      false,
       orm.createdAt,
       orm.updatedAt,
     )

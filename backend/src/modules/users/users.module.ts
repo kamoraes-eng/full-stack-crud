@@ -8,17 +8,29 @@ import { UpdateUserUseCase } from './application/use-cases/update-user.usecase'
 import { DeleteUserUseCase } from './application/use-cases/delete-user.usecase'
 import { TypeOrmUserRepository } from './infrastructure/persistence/typeorm-user.repository'
 import { BcryptAdapter } from './infrastructure/security/bcrypt.adapter'
+import { SeedService } from './infrastructure/seed.service'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserOrmEntity])],
-  controllers: [UsersController],
-  providers: [
-    { provide: 'UserRepository', useClass: TypeOrmUserRepository },
-    { provide: 'PasswordHasherGateway', useClass: BcryptAdapter },
-    CreateUserUseCase,
-    ListUsersUseCase,
-    UpdateUserUseCase,
-    DeleteUserUseCase,
-  ],
+imports: [
+TypeOrmModule.forFeature([UserOrmEntity]),
+],
+controllers: [UsersController],
+providers: [
+{ provide: 'UserRepository', useClass: TypeOrmUserRepository },
+{ provide: 'PasswordHasherGateway', useClass: BcryptAdapter },
+CreateUserUseCase,
+ListUsersUseCase,
+UpdateUserUseCase,
+DeleteUserUseCase,
+SeedService,
+],
+exports: [
+'UserRepository',
+'PasswordHasherGateway',
+CreateUserUseCase,
+ListUsersUseCase,
+UpdateUserUseCase,
+DeleteUserUseCase,
+],
 })
 export class UsersModule {}

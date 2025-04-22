@@ -6,6 +6,7 @@ export class User {
       readonly name: string,
       readonly email: EmailVO,
       readonly password: string,
+      readonly isAdmin: boolean = false,
       readonly createdAt: Date,
       readonly updatedAt: Date,
     ) {}

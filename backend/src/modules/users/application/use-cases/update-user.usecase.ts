@@ -29,6 +29,7 @@ export class UpdateUserUseCase {
       newName,
       newEmail,
       newPassword,
+      existing.isAdmin,
       existing.createdAt,
       new Date(),
     )

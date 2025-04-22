@@ -5,6 +5,7 @@ import { UsersModule } from './modules/users/users.module'
 import { typeOrmConfig } from './shared/infrastructure/typeorm.config'
 import { CacheModule } from '@nestjs/cache-manager'
 import { redisStore } from 'cache-manager-redis-store'
+import { AuthModule } from './modules/auth/auth.module'
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { redisStore } from 'cache-manager-redis-store'
     }),
     TypeOrmModule.forRoot(typeOrmConfig),
     UsersModule,
+    AuthModule,
   ],
 })
 export class AppModule {}
