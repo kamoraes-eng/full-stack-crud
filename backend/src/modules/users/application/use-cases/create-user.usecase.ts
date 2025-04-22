@@ -8,14 +8,15 @@ import { v4 as uuid } from 'uuid'
 @Injectable()
 export class CreateUserUseCase {
   constructor(
-    @Inject('UserRepository') private repo: UserRepository,
-    @Inject('PasswordHasherGateway') private hasher: PasswordHasherGateway,
+    @Inject('UserRepository') private readonly userRepository: UserRepository,
+    @Inject('PasswordHasherGateway') private readonly passwordHasher: PasswordHasherGateway,
   ) {}
+
   async execute(name: string, email: string, password: string): Promise<User> {
     const emailVO = EmailVO.create(email)
-    const hash = await this.hasher.hash(password)
+    const hash = await this.passwordHasher.hash(password)
     const now = new Date()
-    const user = new User(uuid(), name, emailVO, now, now)
-    return this.repo.save({ ...user, password: hash } as any)
+    const newUser = new User(uuid(), name, emailVO, hash, now, now)
+    return this.userRepository.save(newUser)
   }
 }
